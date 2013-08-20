@@ -38,6 +38,7 @@ main = do
      putStrLn $ "Map size: " ++ show w ++ "x" ++ show h
      putStrLn $ "Depth: " ++ show d
      putStrLn $ "Split stdev: " ++ show stdev
+     putStrLn $ "Seed: " ++ show s
      let kdt = kdtree w h d (Just stdev) s
      putSplitters kdt
      toFile file format kdt w h
