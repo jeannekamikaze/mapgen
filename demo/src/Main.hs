@@ -2,7 +2,7 @@
 module Main where
 
 import MapGen.KdTree
-import MapGen.Map
+import MapGen.IO
 import MapGen.Space
 
 import System.Console.CmdArgs
