@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-module MapGen.Map
+module MapGen.IO
 (
     ImageFormat(..)
 ,   toFile
@@ -41,14 +41,13 @@ render w h kdt = do
        renderKdTree kdt
 
 renderKdTree :: KdTree -> Render ()
-renderKdTree = KdTree.mapM_ renderKdTree'
+renderKdTree = KdTree.mapM_ r
+             where r (Leaf _) = return ()
+                   r (Node l c1 c2) =
+                     let (x1,y1,x2,y2) = coords l
+                     in do moveTo x1 y1; lineTo x2 y2; stroke
 
-renderKdTree' (Leaf _) = return ()
-renderKdTree' (Node l c1 c2) =
-              let (x1,y1,x2,y2) = toCoords l
-              in do moveTo x1 y1; lineTo x2 y2; stroke
-
-toCoords :: Line -> (Double, Double, Double, Double)
-toCoords (Line (Vec2 x1 y1) (Vec2 x2 y2)) =
-         (fromIntegral x1+0.5, fromIntegral y1+0.5
-         ,fromIntegral x2+0.5, fromIntegral y2+0.5)
+coords :: Line -> (Double, Double, Double, Double)
+coords (Line (Vec2 x1 y1) (Vec2 x2 y2)) =
+       (fromIntegral x1+0.5, fromIntegral y1+0.5
+       ,fromIntegral x2+0.5, fromIntegral y2+0.5)
