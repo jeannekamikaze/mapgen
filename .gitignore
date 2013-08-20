@@ -1,2 +1,6 @@
 dist
 demo/dist
+demo/demo
+Setup.hs
+*.svg
+*.png
