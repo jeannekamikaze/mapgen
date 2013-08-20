@@ -21,6 +21,7 @@ where
 
 import MapGen.Space
 
+import Control.Monad (liftM2)
 import Control.Monad.Random
 import Control.Monad.State hiding (mapM_)
 import qualified Data.Random.Normal as N
@@ -96,10 +97,7 @@ subtree d q t = do
         let dir = perpDir t
         (t', q1, q2) <- split q dir
         if degenerate t' then return $ Leaf q
-           else do
-                t1 <- subtree (d-1) q1 t'
-                t2 <- subtree (d-1) q2 t'
-                return $ Node t' t1 t2
+        else liftM2 (Node t') (subtree (d-1) q1 t') (subtree (d-1) q2 t')
 
 degenerate :: Line -> Bool
 degenerate (Line p1 p2) = p1 == p2
