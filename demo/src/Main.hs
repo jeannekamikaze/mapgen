@@ -19,6 +19,8 @@ data MapGen = MapGen
      , seed       :: Seed
      } deriving (Data, Typeable, Show)
 
+defStdev = defaultSplitStdev
+
 defaultArgs = cmdArgsMode $ MapGen
             { file       = "map"     &= name "f" &= help "Output file"
             , format     = SVG       &= name "t" &= help "Output file format."
@@ -26,7 +28,7 @@ defaultArgs = cmdArgsMode $ MapGen
             , width      = 256       &= name "w" &= help "Map width"
             , height     = 256       &= name "h" &= help "Map height"
             , depth      = 4         &= name "d" &= help "Maximum kd-tree depth"
-            , splitStdev = 0.1       &= name "p" &= help "Split standard deviation"
+            , splitStdev = defStdev  &= name "p" &= help "Split standard deviation"
             , seed       = (-1)      &= name "s" &= help "Random seed"
             }
 

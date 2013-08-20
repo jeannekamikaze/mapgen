@@ -4,6 +4,7 @@ module MapGen.KdTree
     -- * Construction
 ,   kdtree
 ,   kdtree'
+,   defaultSplitStdev
 ,   Seed
 ,   Width
 ,   Height
@@ -58,7 +59,7 @@ data KdTree
 -- Random monad with implicit normal distribution.
 
 mean = 0.5
-defaultStdev = 0.1
+defaultSplitStdev = 0.2
 
 type RandM a = StateT Normals Rand a
 
@@ -71,18 +72,18 @@ def Nothing  x = x
 -- | Construct a random Kd-Tree.
 kdtree :: Width -> Height -> Depth -> Maybe Stdev -> Seed -> KdTree
 kdtree w h d stdev' s = flip evalRand (mkStdGen s) . kdtree'' $ Params w h d stdev
-       where stdev = def stdev' defaultStdev
+       where stdev = def stdev' defaultSplitStdev
 
 -- | Construct a random Kd-Tree.
 kdtree' :: RandomGen g => g -> Width -> Height -> Depth -> Maybe Stdev -> KdTree
 kdtree' g w h d stdev' = flip evalRand g . kdtree'' $ Params w h d stdev
-        where stdev = def stdev' defaultStdev
+        where stdev = def stdev' defaultSplitStdev
 
 kdtree'' :: Params -> Rand KdTree
 kdtree'' ps = do
          let w = width ps
              h = height ps
-             q = Quad (Vec2 0 0) (Vec2 w h)
+             q = Quad (Vec2 0 0) (Vec2 (w-1) (h-1))
              stdev = splitStdev ps
          normals <- rand >>= return . N.mkNormals' (mean,stdev) :: Rand Normals
          tang <- randTangent w h
@@ -102,6 +103,8 @@ subtree d q t = do
 degenerate :: Line -> Bool
 degenerate (Line p1 p2) = p1 == p2
 
+-- Split the oriented quad in the given direction.
+-- The quad's orientation determines the splitter's orientation.
 split :: Quad -> Direction -> RandM (Line, Quad, Quad)
 
 split q@(Quad p1 p2) Vertical = do
