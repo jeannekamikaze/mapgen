@@ -12,6 +12,7 @@ module MapGen.KdTree
 ,   Stdev
     -- * Access
 ,   splitters
+,   quads
     -- * Traversal
 ,   fold
 ,   mapM_
@@ -149,6 +150,11 @@ splitters :: KdTree -> [Line]
 splitters = fold splitter []
           where splitter ss l@Leaf{} = ss
                 splitter ss l@(Node s _ _) = s:ss
+
+quads :: KdTree -> [Quad]
+quads = fold f []
+      where f qs l@(Leaf q) = q:qs
+            f qs _ = qs
 
 -- Traversal
 
