@@ -1,10 +1,15 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 module Main where
 
-import MapGen.KdTree
+import Floor
+import IO
+
+import MapGen.Floor
+import MapGen.KdTree hiding (mapM_)
 import MapGen.IO
 import MapGen.Space
 
+import Data.Foldable as F (mapM_)
 import System.Console.CmdArgs
 import System.Random
 import Prelude as P
@@ -23,10 +28,10 @@ defStdev = defaultSplitStdev
 
 defaultArgs = cmdArgsMode $ MapGen
             { file       = "map"     &= name "f" &= help "Output file"
-            , format     = SVG       &= name "t" &= help "Output file format."
+            , format     = PNG       &= name "t" &= help "Output file format."
                                      &= typ "SVG | PNG"
-            , width      = 256       &= name "w" &= help "Map width"
-            , height     = 256       &= name "h" &= help "Map height"
+            , width      = 64        &= name "w" &= help "Map width"
+            , height     = 64        &= name "h" &= help "Map height"
             , depth      = 4         &= name "d" &= help "Maximum kd-tree depth"
             , splitStdev = defStdev  &= name "p" &= help "Split standard deviation"
             , seed       = (-1)      &= name "s" &= help "Random seed"
@@ -41,7 +46,10 @@ main = do
      putStrLn $ "Seed: " ++ show s
      let kdt = kdtree w h d (Just stdev) s
      putSplitters kdt
-     toFile file format kdt w h
+     putQuads kdt
+     let floor = mkFloor kdt randCorridor (randRoom w h) s
+     F.mapM_ (putStrLn . show) floor
+     toFile file format kdt w h [F.mapM_ renderDecor floor]
 
-putSplitters :: KdTree -> IO ()
 putSplitters = P.mapM_ (putStrLn . show) . splitters
+putQuads = P.mapM_ (putStrLn . show) . quads

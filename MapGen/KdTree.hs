@@ -6,8 +6,6 @@ module MapGen.KdTree
 ,   kdtree'
 ,   defaultSplitStdev
 ,   Seed
-,   Width
-,   Height
 ,   Depth
 ,   Stdev
     -- * Access
@@ -31,8 +29,6 @@ import Prelude hiding (mapM_)
 type Tangent = Line
 
 type Seed   = Int
-type Width  = Int
-type Height = Int
 type Depth  = Int
 type Stdev  = Double
 
@@ -97,7 +93,7 @@ subtree d q t = do
         let dir = perpDir t
         (t', q1, q2) <- split q dir
         if degenerate t' then return $ Leaf q
-        else liftM2 (Node t') (subtree (d-1) q1 t') (subtree (d-1) q2 t')
+           else liftM2 (Node t') (subtree (d-1) q1 t') (subtree (d-1) q2 t')
 
 degenerate :: Line -> Bool
 degenerate (Line p1 p2) = p1 == p2
@@ -117,7 +113,15 @@ split q@(Quad p1 p2) Horizontal = do
       return . split' q $ Line (Vec2 (x p1) y') (Vec2 (x p2) y')
 
 split' :: Quad -> Line -> (Line, Quad, Quad)
-split' (Quad p1 p2) l@(Line p3 p4) = (l, Quad p1 p4, Quad p3 p2)
+split' (Quad p1 p2) l@(Line p3 p4) = (l, Quad p1 p4', Quad p3' p2)
+       where p4' = disp p1 p4
+             p3' = disp p2 p3
+             disp pline pquad = pquad +
+                  if (x p3 == x p4)
+                  -- Vertical line
+                  then if (x pquad > x pline) then Vec2 (-1) 0 else Vec2 1 0
+                  -- Horizontal line
+                  else if (y pquad > y pline) then Vec2 0 (-1) else Vec2 0 1
 
 lerp :: Double -> Int -> Int -> Int
 lerp n a1' a2' = floor $ a1 + n*(a2-a1)
